@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(msdfgen)
 
-find_package(Freetype REQUIRED)
+option(BUILD_EXECUTABLE "Build executable" OFF)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -62,7 +62,7 @@ file(GLOB_RECURSE msdfgen_SOURCES
 	"ext/*.cpp"
 )
 
-include_directories(${FREETYPE_INCLUDE_DIRS})
+include_directories(${freetype_SOURCE_DIR}/include)
 include_directories("include")
 
 # Build the library (aliased name because it's the same target name the exe)
@@ -71,10 +71,11 @@ folderize_sources(msdfgen_SOURCES ${CMAKE_SOURCE_DIR})
 
 add_library(lib_msdfgen ${msdfgen_SOURCES} ${msdfgen_HEADERS})
 set_target_properties(lib_msdfgen PROPERTIES OUTPUT_NAME msdfgen)
-target_link_libraries(lib_msdfgen ${FREETYPE_LIBRARIES})
+target_link_libraries(lib_msdfgen freetype)
 
 # Build the executable
-
-add_executable(msdfgen main.cpp msdfgen.h msdfgen-ext.h)
-target_compile_definitions(msdfgen PRIVATE MSDFGEN_STANDALONE)
-target_link_libraries(msdfgen lib_msdfgen)
+if(BUILD_EXECUTABLE)
+	add_executable(msdfgen main.cpp msdfgen.h msdfgen-ext.h)
+	target_compile_definitions(msdfgen PRIVATE MSDFGEN_STANDALONE)
+	target_link_libraries(msdfgen lib_msdfgen)
+endif()
